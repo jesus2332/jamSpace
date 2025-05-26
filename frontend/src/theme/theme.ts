@@ -1,19 +1,24 @@
 // src/theme/theme.ts
 import { createTheme } from '@mui/material/styles';
-import { red } from '@mui/material/colors';
 
 // Crea una instancia del tema.
 const theme = createTheme({
   palette: {
+    mode: 'dark', 
     primary: {
-      main: '#556cd6', // azul
+      main: '#9333ea', 
     },
     secondary: {
-      main: '#19857b', // verde azulado
+      main: '#F02E99', 
     },
-    error: {
-      main: red.A400,
+    background: {
+      default: '#0f172a', 
+      paper: '#1e293b',   
     },
+    text: {
+        primary: '#f8fafc', 
+        secondary: '#cbd5e1' 
+    }
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',

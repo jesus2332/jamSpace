@@ -1,9 +1,9 @@
 // src/pages/RoomDetailPage.tsx
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link as RouterLink, useLocation } from 'react-router';
+import { useParams, useNavigate, Link as RouterLink, useLocation } from 'react-router'; 
 import { getRoomById } from '../services/roomService';
 import * as bookingService from '../services/bookingService';
-import type { Room } from '../types/room';
+import type { Room } from '../types/room'; 
 import { useAuth } from '../contexts/AuthContext';
 import {
   Container,
@@ -19,6 +19,7 @@ import {
   Button,
   Chip,
   Alert,
+  Divider, 
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import PeopleIcon from '@mui/icons-material/People';
@@ -26,17 +27,22 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { format } from 'date-fns'; 
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'; 
+
+import { format, isSameDay } from 'date-fns'; 
+
+const EARLIEST_BOOKING_HOUR = 10; 
+const LATEST_BOOKING_END_HOUR = 23; 
 
 const calculateDurationInHours = (start: Date | null, end: Date | null): number => {
-  if (!start || !end || end.getTime() <= start.getTime()) return 0; 
+  if (!start || !end || end.getTime() <= start.getTime()) return 0;
   const diffMs = end.getTime() - start.getTime();
   return diffMs / (1000 * 60 * 60);
 };
 
 const RoomDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth(); 
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -55,8 +61,10 @@ const RoomDetailPage: React.FC = () => {
       const fetchRoom = async () => {
         setLoading(true);
         setError(null);
-        setBookingSuccess(null); 
+        setBookingSuccess(null);
         setBookingError(null);
+        setStartTime(null); 
+        setEndTime(null);
         try {
           const roomId = parseInt(id, 10);
           if (isNaN(roomId)) {
@@ -86,7 +94,7 @@ const RoomDetailPage: React.FC = () => {
       setBookingError('Por favor, selecciona una fecha y hora de inicio y fin.');
       return;
     }
-    if (endTime.getTime() <= startTime.getTime()) { 
+    if (endTime.getTime() <= startTime.getTime()) {
       setBookingError('La hora de fin debe ser posterior a la hora de inicio.');
       return;
     }
@@ -109,10 +117,10 @@ const RoomDetailPage: React.FC = () => {
       setBookingSuccess(
         `¡Reserva para "${newBooking.roomName}" creada exitosamente de ${format(new Date(newBooking.startTime), 'dd/MM/yyyy HH:mm')} a ${format(new Date(newBooking.endTime), 'dd/MM/yyyy HH:mm')}! Puedes verla en "Mis Reservas".`
       );
-      setStartTime(null);
+      setStartTime(null); 
       setEndTime(null);
     } catch (err: any) {
-      setBookingError(err.message || 'Error al crear la reserva. La sala podría no estar disponible o los horarios son incorrectos.');
+      setBookingError(err.message || 'Error al crear la reserva. La sala podría no estar disponible o los horarios/fechas son incorrectos.');
       console.error(err);
     } finally {
       setBookingLoading(false);
@@ -121,185 +129,265 @@ const RoomDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-        <CircularProgress />
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="calc(100vh - 150px)" sx={{ color: 'secondary.main' }}>
+        <CircularProgress color="inherit" size={50} />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Typography color="error" textAlign="center" variant="h5" mt={4}>
-        {error}
-      </Typography>
+        <Container maxWidth="sm" sx={{py: 5}}>
+            <Alert severity="error" variant="filled">
+                <Typography variant="h6">Error</Typography>
+                {error}
+            </Alert>
+        </Container>
     );
   }
 
   if (!room) {
-    return <Typography textAlign="center" variant="h5" mt={4}>Sala no encontrada.</Typography>;
+    return (
+        <Container maxWidth="sm" sx={{py: 5, textAlign: 'center'}}>
+            <Typography variant="h5" color="text.secondary">Sala no encontrada.</Typography>
+        </Container>
+    );
   }
 
-  const imageSrc = room.imageUrl || '/images/rooms/default-room.svg'; 
+  const imageSrc = '/studioA.jpg'; 
   const durationHours = calculateDurationInHours(startTime, endTime);
-  const estimatedCost = durationHours > 0 ? (durationHours * room.pricePerHour).toFixed(2) : "0.00";
+  const estimatedCost = durationHours > 0 && room.pricePerHour ? (durationHours * room.pricePerHour).toFixed(2) : "0.00";
 
   return (
-    <Container maxWidth="lg" sx={{ mt: { xs: 2, md: 3 }, mb: 4 }}>
-      <Paper elevation={3} sx={{ padding: { xs: 2, sm: 3, md: 4 } }}>
-        <Typography variant="h3" component="h1" gutterBottom className="font-bold text-gray-800">
-          {room.name}
-        </Typography>
-
-        <Grid container spacing={{ xs: 2, md: 4 }}>
-          <Grid size={{xs: 12, md: 7}}>
-            <Box
-              component="img"
-              sx={{
-                width: '100%',
-                maxHeight: { xs: 300, sm: 400, md: 450 },
-                objectFit: 'cover',
-                borderRadius: '8px',
-                boxShadow: 3,
-              }}
-              src={imageSrc}
-              alt={room.name}
-            />
-          </Grid>
-          <Grid size={{xs: 12, md: 5}}>
-            <Typography variant="h5" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
-              Detalles de la Sala
-            </Typography>
-            <List dense>
-              <ListItem sx={{ pl: 0 }}>
-                <ListItemIcon>
-                  <PeopleIcon color="action" />
-                </ListItemIcon>
-                <ListItemText primaryTypographyProps={{variant:'body1'}} primary={`Capacidad: ${room.capacity} personas`} />
-              </ListItem>
-              <ListItem sx={{ pl: 0 }}>
-                <ListItemIcon>
-                  <AttachMoneyIcon color="action" />
-                </ListItemIcon>
-                <ListItemText primaryTypographyProps={{variant:'body1'}} primary={`Precio: $${room.pricePerHour.toFixed(2)} / hora`} />
-              </ListItem>
-            </List>
-
-            {room.description && (
-              <Box mt={2}>
-                <Typography variant="h6" gutterBottom>
-                  Descripción
-                </Typography>
-                <Typography variant="body1" paragraph sx={{whiteSpace: 'pre-line'}}>
-                  {room.description}
-                </Typography>
-              </Box>
-            )}
-          </Grid>
-        </Grid>
-
-        {room.equipment && room.equipment.length > 0 && (
-          <Box mt={4}>
-            <Typography variant="h5" gutterBottom sx={{ color: 'primary.main' }}>
-              Equipamiento Incluido
-            </Typography>
-            <Box display="flex" flexWrap="wrap" gap={1}>
-              {room.equipment.map((item, index) => (
-                <Chip
-                  key={index}
-                  icon={<CheckCircleOutlineIcon fontSize="small" />}
-                  label={item}
-                  variant="outlined"
-                  color="secondary"
-                  size="medium"
-                />
-              ))}
-            </Box>
-          </Box>
-        )}
-
-        {/* Sección de Reserva */}
-        <Box component="form" onSubmit={handleBookingSubmit} mt={5} py={3} borderTop={1} borderColor="divider">
-          <Typography variant="h5" component="h2" gutterBottom className="text-center mb-4">
-            Realizar una Reserva
+    <Box sx={{ py: { xs: 3, md: 5 } }}> 
+      <Container maxWidth="lg">
+        <Paper 
+          elevation={6} 
+          sx={{ 
+            padding: { xs: 2, sm: 3, md: 4 },
+            backgroundColor: 'rgba(30, 41, 59, 0.85)', 
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(51, 65, 85, 0.6)', 
+            borderRadius: '16px',
+            color: 'text.primary'
+          }}
+        >
+          <Typography 
+            variant="h2" 
+            component="h1" 
+            gutterBottom 
+            fontWeight="bold"
+            sx={{ color: 'secondary.main', mb: 3, textAlign: {xs: 'center', md: 'left'} }}
+          >
+            {room.name}
           </Typography>
 
-          {bookingError && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setBookingError(null)}>{bookingError}</Alert>}
-          {bookingSuccess && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setBookingSuccess(null)}>{bookingSuccess}</Alert>}
-
-          {!isAuthenticated && (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              Por favor, 
-              <RouterLink to="/login" state={{ from: location }} style={{ fontWeight: 'bold', color: 'inherit' }}>
-                inicia sesión
-              </RouterLink>
-               o 
-              <RouterLink to="/register" style={{ fontWeight: 'bold', color: 'inherit' }}>
-                regrístrate
-              </RouterLink>
-               para poder realizar una reserva.
-            </Alert>
-          )}
-
-          <Grid container spacing={2} alignItems="flex-start"> {/* alignItems a flex-start */}
-            <Grid size={{xs: 12, sm: 6, md: 5}}>
-              <DateTimePicker
-                label="Inicio de la Reserva"
-                value={startTime}
-                onChange={(newValue) => { setStartTime(newValue); setBookingSuccess(null); setBookingError(null); }}
-                ampm={false}
-                disablePast
-                minutesStep={30}
-                sx={{ width: '100%' }}
-                disabled={!isAuthenticated || bookingLoading}
-                slotProps={{ textField: { helperText: "Selecciona fecha y hora de inicio" } }}
+          <Grid container spacing={{ xs: 3, md: 5 }}>
+            <Grid size={{xs: 12, md: 7}}> 
+              <Box
+                component="img"
+                sx={{
+                  width: '100%',
+                  maxHeight: { xs: 300, sm: 400, md: 500 },
+                  objectFit: 'cover',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}
+                src={imageSrc}
+                alt={room.name}
               />
-            </Grid>
-            <Grid size={{xs: 12, sm: 6, md: 5}}>
-              <DateTimePicker
-                label="Fin de la Reserva"
-                value={endTime}
-                onChange={(newValue) => { setEndTime(newValue); setBookingSuccess(null); setBookingError(null); }}
-                ampm={false}
-                disablePast
-                minutesStep={30}
-                minDateTime={startTime ? new Date(startTime.getTime() + 30 * 60000) : undefined}
-                sx={{ width: '100%' }}
-                disabled={!isAuthenticated || bookingLoading || !startTime}
-                slotProps={{ textField: { helperText: "Selecciona fecha y hora de fin" } }}
-              />
-            </Grid>
-            <Grid size={{xs: 12, md: 2}} sx={{ textAlign: { xs: 'center', md: 'left' }, mt: { xs: 2, md: 0 }, alignSelf: 'center' }}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                size="large"
-                startIcon={bookingLoading ? <CircularProgress size={20} color="inherit" /> : <EventAvailableIcon />}
-                disabled={!isAuthenticated || bookingLoading || !startTime || !endTime || (endTime && startTime && endTime.getTime() <= startTime.getTime())}
-                sx={{ width: {xs: '100%', md: 'auto'}}}
-              >
-                {bookingLoading ? 'Procesando...' : 'Reservar'}
-              </Button>
-            </Grid>
-            {startTime && endTime && endTime.getTime() > startTime.getTime() && (
-              <Grid size={{xs: 12, md: 2}} sx={{ mt: 2 }}>
-                <Box display="flex" justifyContent="space-between" alignItems="center" p={2} bgcolor="action.hover" borderRadius={1}>
-                  <Box display="flex" alignItems="center">
-                    <AccessTimeIcon color="action" sx={{ mr: 1 }} />
-                    <Typography variant="body1">
-                      Duración: {durationHours.toFixed(1)} horas
-                    </Typography>
+              {room.equipment && room.equipment.length > 0 && (
+                <Box mt={4}>
+                  <Typography variant="h5" gutterBottom sx={{ color: 'primary.light', fontWeight: 'medium' }}>
+                    Equipamiento Incluido
+                  </Typography>
+                  <Box display="flex" flexWrap="wrap" gap={1.5}>
+                    {room.equipment.map((item, index) => (
+                      <Chip
+                        key={index}
+                        icon={<CheckCircleOutlineIcon fontSize="small" sx={{color: 'rgba(255,255,255,0.7)'}}/>}
+                        label={item}
+                        sx={{ 
+                            backgroundColor: 'rgba(51, 65, 85, 0.7)', 
+                            color: 'rgba(255,255,255,0.9)', 
+                            border: '1px solid rgba(71, 85, 105, 0.8)', 
+                            fontSize: '0.9rem'
+                        }}
+                      />
+                    ))}
                   </Box>
-                  <Typography variant="h6" color="primary.main">
-                    Costo Estimado: ${estimatedCost}
+                </Box>
+              )}
+            </Grid>
+
+            <Grid size={{xs: 12, md: 5}}> 
+              <Typography variant="h5" gutterBottom sx={{ color: 'primary.light', fontWeight: 'medium', mb: 2 }}>
+                Detalles de la Sala
+              </Typography>
+              <List dense sx={{mb: 3}}>
+                <ListItem disablePadding sx={{ mb: 1 }}>
+                  <ListItemIcon sx={{minWidth: 36}}><PeopleIcon sx={{color: 'secondary.light'}}/></ListItemIcon>
+                  <ListItemText primaryTypographyProps={{variant:'body1'}} primary={`Capacidad: ${room.capacity} personas`} />
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemIcon sx={{minWidth: 36}}><AttachMoneyIcon sx={{color: 'secondary.light'}}/></ListItemIcon>
+                  <ListItemText primaryTypographyProps={{variant:'body1'}} primary={`Precio: $${room.pricePerHour.toFixed(2)} / hora`} />
+                </ListItem>
+              </List>
+
+              {room.description && (
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.light', fontWeight: 'medium', mt: 3 }}>
+                    Descripción
+                  </Typography>
+                  <Typography variant="body1" paragraph sx={{ whiteSpace: 'pre-line', color: 'text.secondary', lineHeight: 1.7 }}>
+                    {room.description}
                   </Typography>
                 </Box>
-              </Grid>
-            )}
+              )}
+            </Grid>
           </Grid>
-        </Box>
-      </Paper>
-    </Container>
+
+          <Divider sx={{ my: {xs: 4, md: 5}, borderColor: 'rgba(255,255,255,0.2)' }} />
+
+          {/* Sección de Reserva */}
+          <Box component="form" onSubmit={handleBookingSubmit}>
+            <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center', mb: 3, fontWeight: 'bold', color: 'primary.light' }}>
+              Realiza tu Reserva
+            </Typography>
+
+            {bookingError && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setBookingError(null)}>{bookingError}</Alert>}
+            {bookingSuccess && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setBookingSuccess(null)}>{bookingSuccess}</Alert>}
+
+            {!isAuthenticated && (
+              <Alert 
+                severity="info" 
+                icon={<InfoOutlinedIcon />}
+                sx={{ 
+                    mb: 3, 
+                    backgroundColor: 'rgba(30,58,138,0.3)', 
+                    color: '#e0e7ff' 
+                }}
+              >
+                Por favor, 
+                <RouterLink to="/login" state={{ from: location }} className="font-semibold underline hover:text-indigo-300">
+                  inicia sesión
+                </RouterLink>
+                 o 
+                <RouterLink to="/register" className="font-semibold underline hover:text-indigo-300">
+                  regrístrate
+                </RouterLink>
+                 para poder realizar una reserva.
+              </Alert>
+            )}
+
+            <Grid container spacing={2} alignItems="center" justifyContent="center">
+              <Grid size={{xs: 12, md: 5}}>
+                <DateTimePicker
+                  label="Inicio de la Reserva"
+                  value={startTime}
+                  onChange={(newValue) => { setStartTime(newValue); setBookingSuccess(null); setBookingError(null); }}
+                  ampm={false}
+                  disablePast
+                  minutesStep={60}
+                  sx={{ width: '100%'}}
+                  disabled={!isAuthenticated || bookingLoading}
+                  slotProps={{ 
+                    textField: { 
+                        helperText: "Horario: 10 AM - 10 PM (inicio)" ,
+                        sx: {'.MuiFormHelperText-root': {color: 'text.secondary'}}
+                    },
+                    openPickerButton: { color: 'secondary' }
+                  }}
+                  shouldDisableTime={(timeValue, clockType) => {
+                    if (clockType === 'hours') {
+                      const hour = timeValue.getHours();
+                      return hour < EARLIEST_BOOKING_HOUR || hour >= LATEST_BOOKING_END_HOUR;
+                    }
+                    return false;
+                  }}
+                />
+              </Grid>
+              <Grid size={{xs: 12, md: 5}}>
+                <DateTimePicker
+                  label="Fin de la Reserva"
+                  value={endTime}
+                  onChange={(newValue) => { setEndTime(newValue); setBookingSuccess(null); setBookingError(null); }}
+                  ampm={false}
+                  disablePast
+                  minutesStep={60}
+                  minDateTime={startTime ? new Date(startTime.getTime() + 60 * 60000) : undefined}
+                  sx={{ width: '100%' }}
+                  disabled={!isAuthenticated || bookingLoading || !startTime}
+                  slotProps={{ 
+                    textField: { 
+                        helperText: "Horario: hasta 11 PM (fin)",
+                        sx: {'.MuiFormHelperText-root': {color: 'text.secondary'}}
+                    },
+                    openPickerButton: { color: 'secondary' }
+                  }}
+                  shouldDisableTime={(timeValue, clockType) => {
+                    if (clockType === 'hours') {
+                      const hour = timeValue.getHours();
+                      if (hour > LATEST_BOOKING_END_HOUR || (hour === 0 && LATEST_BOOKING_END_HOUR !== 23) ) return true; // No después de las 23:00 (o 00:00 si LATEST es 23)
+                      if (hour === 0 && LATEST_BOOKING_END_HOUR === 23) return false; // Permitir 00:00 si es el fin del día
+                      
+                      if (hour < EARLIEST_BOOKING_HOUR + 1 && !(hour === 0 && startTime && !isSameDay(startTime, timeValue))) return true; // No antes de las 11:00 (a menos que sea medianoche de un día diferente y el inicio fuera el día anterior)
+
+                      if (startTime && isSameDay(startTime, timeValue)) {
+                        if (hour <= startTime.getHours()) return true;
+                      }
+                      return false;
+                    }
+                    return false;
+                  }}
+                />
+              </Grid>
+              {startTime && endTime && endTime.getTime() > startTime.getTime() && (
+                <Grid size={{xs: 12, md: 10}} sx={{ mt: 1, mb: 1 }}> 
+                  <Box 
+                    display="flex" 
+                    justifyContent="space-between" 
+                    alignItems="center" 
+                    p={{xs:1.5, sm:2}}
+                    sx={{
+                        backgroundColor: 'rgba(51, 65, 85, 0.5)', 
+                        borderRadius: '8px',
+                        border: '1px solid rgba(71, 85, 105, 0.7)' 
+                    }}
+                  >
+                    <Box display="flex" alignItems="center">
+                      <AccessTimeIcon sx={{ mr: 1, color: 'secondary.light' }} />
+                      <Typography variant="body1">
+                        Duración: {durationHours.toFixed(1)} hora(s)
+                      </Typography>
+                    </Box>
+                    <Typography variant="h6" sx={{color: 'secondary.main', fontWeight:'bold'}}>
+                      Costo: ${estimatedCost}
+                    </Typography>
+                  </Box>
+                </Grid>
+              )}
+              <Grid size={{xs: 12, md: 10}} sx={{ textAlign: 'center', mt: 1 }}> 
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="secondary" 
+                  size="large"
+                  fullWidth 
+                  startIcon={bookingLoading ? <CircularProgress size={24} color="inherit" /> : <EventAvailableIcon />}
+                  disabled={!isAuthenticated || bookingLoading || !startTime || !endTime || (endTime && startTime && endTime.getTime() <= startTime.getTime())}
+                  sx={{ py: 1.5, fontSize: '1.1rem', fontWeight: 'bold' }}
+                >
+                  {bookingLoading ? 'Procesando Reserva...' : 'Confirmar y Reservar'}
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 

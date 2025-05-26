@@ -1,24 +1,20 @@
 // src/pages/RoomsPage.tsx
 import React, { useState, useEffect } from 'react';
 import { getAllRooms } from '../services/roomService';
-import type { Room, PaginatedRoomResponse } from '../types/room';
+import type { PaginatedRoomResponse } from '../types/room'; 
+import RoomCard from '../components/RoomCard'; 
 import {
   CircularProgress,
   Typography,
   Grid,
-  Card,
-  CardMedia,
-  CardContent,
-  CardActions,
-  Button,
   Box,
-  Pagination 
+  Pagination,
+  Container,
+  Alert
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router'; 
 
 const RoomsPage: React.FC = () => {
   const [paginatedResponse, setPaginatedResponse] = useState<PaginatedRoomResponse | null>(null);
-  const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(0); 
@@ -28,9 +24,8 @@ const RoomsPage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getAllRooms(currentPage, 6); 
+        const data = await getAllRooms(currentPage, 6, 'name,asc'); 
         setPaginatedResponse(data);
-        setRooms(data.content);
       } catch (err) {
         setError('Error al cargar las salas. Inténtalo de nuevo más tarde.');
         console.error(err);
@@ -40,90 +35,97 @@ const RoomsPage: React.FC = () => {
     };
 
     fetchRooms();
-  }, [currentPage]); 
+  }, [currentPage]);
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value - 1); 
   };
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <Box display="flex" justifyContent="center" alignItems="center" sx={{ py: 10 }}>
+          <CircularProgress color="secondary" size={50} />
+        </Box>
+      );
+    }
 
-  if (error) {
-    return (
-      <Typography color="error" textAlign="center" variant="h6">
-        {error}
-      </Typography>
-    );
-  }
+    if (error) {
+      return (
+        <Alert severity="error" sx={{ mt: 4, mx: 'auto', maxWidth: 'md' }}>
+          {error}
+        </Alert>
+      );
+    }
 
-  if (!paginatedResponse || rooms.length === 0) {
-    return <Typography textAlign="center" variant="h6">No hay salas disponibles en este momento.</Typography>;
-  }
+    if (!paginatedResponse || paginatedResponse.content.length === 0) {
+      return (
+        <Typography variant="h6" textAlign="center" sx={{ py: 10, color: 'text.secondary' }}>
+          No hay salas disponibles en este momento.
+        </Typography>
+      );
+    }
+
+    return (
+      <>
+        <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ mb: 4 }}>
+          {paginatedResponse.content.map((room) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={room.id} > 
+              <RoomCard room={room} />
+            </Grid>
+          ))}
+        </Grid>
+
+        {paginatedResponse.totalPages > 1 && (
+          <Box display="flex" justifyContent="center" mt={4}>
+            <Pagination
+              count={paginatedResponse.totalPages}
+              page={currentPage + 1}
+              onChange={handlePageChange}
+              color="secondary" 
+              size="large"
+              sx={{
+                '& .MuiPaginationItem-root': { 
+                  color: 'rgba(255,255,255,0.7)',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                },
+                '& .Mui-selected': { 
+                  backgroundColor: 'secondary.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'secondary.dark',
+                  }
+                },
+              }}
+            />
+          </Box>
+        )}
+      </>
+    );
+  };
 
   return (
-    <div>
-      <Typography variant="h4" component="h1" gutterBottom className="text-center mb-6 font-semibold">
-        Nuestras Salas de Ensayo
-      </Typography>
-      <Grid container spacing={3}>
-        {rooms.map((room) => (
-          <Grid key={room.id} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Card className="h-full flex flex-col">
-              <CardMedia
-                component="img"
-                // height="140" 
-                className="h-48 object-cover" 
-                image={room.imageUrl || 'https://via.placeholder.com/300x200?text=Sala+de+Ensayo'} 
-                alt={room.name}
-              />
-              <CardContent className="flex-grow">
-                <Typography gutterBottom variant="h5" component="div">
-                  {room.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" className="mb-1">
-                  Capacidad: {room.capacity} personas
-                </Typography>
-                <Typography variant="body2" color="text.secondary" className="mb-1">
-                  Precio: ${room.pricePerHour.toFixed(2)} / hora
-                </Typography>
-                {room.description && (
-                  <Typography variant="body2" color="text.secondary" className="truncate">
-                    {room.description}
-                  </Typography>
-                )}
-              </CardContent>
-              <CardActions>
-                <Button
-                  size="small"
-                  color="primary"
-                  variant="contained"
-                  component={RouterLink}
-                  to={`/rooms/${room.id}`}
-                >
-                  Ver Detalles y Reservar
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-      {paginatedResponse && paginatedResponse.totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={4}>
-          <Pagination
-            count={paginatedResponse.totalPages}
-            page={currentPage + 1} 
-            onChange={handlePageChange}
-            color="primary"
-          />
-        </Box>
-      )}
-    </div>
+    <Box className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900" sx={{ 
+      minHeight: 'calc(100vh - 64px - 73px)', 
+      py: { xs: 4, md: 6 }, 
+    }}>
+      <Container maxWidth="xl"> 
+        <Typography 
+          variant="h2" 
+          component="h1" 
+          gutterBottom 
+          textAlign="center"
+          fontWeight="bold"
+          sx={{ 
+            mb: { xs: 4, md: 6 }, 
+            color: 'white', 
+          }}
+        >
+          Nuestras Salas de Ensayo
+        </Typography>
+        {renderContent()}
+      </Container>
+    </Box>
   );
 };
 
