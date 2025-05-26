@@ -1,6 +1,5 @@
 // src/pages/MyBookingsPage.tsx
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { getMyBookings as fetchMyBookings, cancelBooking as apiCancelBooking } from '../services/bookingService';
 import type { BookingResponse } from '../types/booking';
 import {Link as RouterLink} from 'react-router'; 
@@ -30,7 +29,6 @@ import CelebrationIcon from '@mui/icons-material/Celebration';
 import { es } from 'date-fns/locale';
 
 const MyBookingsPage: React.FC = () => {
-  const { user } = useAuth(); 
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

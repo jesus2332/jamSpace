@@ -1,6 +1,6 @@
 // src/pages/RoomDetailPage.tsx
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link as RouterLink, useLocation } from 'react-router'; 
+import { useParams, Link as RouterLink, useLocation } from 'react-router'; 
 import { getRoomById } from '../services/roomService';
 import * as bookingService from '../services/bookingService';
 import type { Room } from '../types/room'; 
@@ -43,7 +43,6 @@ const calculateDurationInHours = (start: Date | null, end: Date | null): number 
 const RoomDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated } = useAuth(); 
-  const navigate = useNavigate();
   const location = useLocation();
 
   const [room, setRoom] = useState<Room | null>(null);
@@ -270,15 +269,15 @@ const RoomDetailPage: React.FC = () => {
                     color: '#e0e7ff' 
                 }}
               >
-                Por favor, 
+                Por favor,{' '}  
                 <RouterLink to="/login" state={{ from: location }} className="font-semibold underline hover:text-indigo-300">
-                  inicia sesión
+                inicia sesión
                 </RouterLink>
-                 o 
+                {' '}o{' '}
                 <RouterLink to="/register" className="font-semibold underline hover:text-indigo-300">
-                  regrístrate
+                regrístrate
                 </RouterLink>
-                 para poder realizar una reserva.
+                {' '}para poder realizar una reserva.
               </Alert>
             )}
 
@@ -320,6 +319,8 @@ const RoomDetailPage: React.FC = () => {
                   minDateTime={startTime ? new Date(startTime.getTime() + 60 * 60000) : undefined}
                   sx={{ width: '100%' }}
                   disabled={!isAuthenticated || bookingLoading || !startTime}
+                  minDate={startTime ? startTime : undefined}
+                  maxDate={startTime ? startTime : undefined}
                   slotProps={{ 
                     textField: { 
                         helperText: "Horario: hasta 11 PM (fin)",
@@ -330,14 +331,12 @@ const RoomDetailPage: React.FC = () => {
                   shouldDisableTime={(timeValue, clockType) => {
                     if (clockType === 'hours') {
                       const hour = timeValue.getHours();
-                      if (hour > LATEST_BOOKING_END_HOUR || (hour === 0 && LATEST_BOOKING_END_HOUR !== 23) ) return true; // No después de las 23:00 (o 00:00 si LATEST es 23)
-                      if (hour === 0 && LATEST_BOOKING_END_HOUR === 23) return false; // Permitir 00:00 si es el fin del día
-                      
-                      if (hour < EARLIEST_BOOKING_HOUR + 1 && !(hour === 0 && startTime && !isSameDay(startTime, timeValue))) return true; // No antes de las 11:00 (a menos que sea medianoche de un día diferente y el inicio fuera el día anterior)
-
                       if (startTime && isSameDay(startTime, timeValue)) {
                         if (hour <= startTime.getHours()) return true;
                       }
+                      if (hour > LATEST_BOOKING_END_HOUR || (hour === 0 && LATEST_BOOKING_END_HOUR !== 23)) return true;
+                      if (hour === 0 && LATEST_BOOKING_END_HOUR === 23) return false; 
+                      if (hour < EARLIEST_BOOKING_HOUR + 1 && !(hour === 0 && startTime && !isSameDay(startTime, timeValue))) return true;
                       return false;
                     }
                     return false;

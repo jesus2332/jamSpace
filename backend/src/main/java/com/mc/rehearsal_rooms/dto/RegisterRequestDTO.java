@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 public class RegisterRequestDTO {
 
     @NotBlank(message = "Username cannot be blank")
-    @Size(min = 3, max = 100, message = "Username must be between 3 and 50 characters")
+    @Size(min = 1, max = 50, message = "Username must be between 1 and 50 characters")
     private String username;
 
     @NotBlank(message = "Email cannot be blank")

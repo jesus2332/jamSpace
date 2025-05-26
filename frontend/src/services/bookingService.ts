@@ -1,7 +1,7 @@
 // src/services/bookingService.ts
 import axios from 'axios';
-import type { BookingRequest, BookingResponse, PaginatedBookingResponse } from '../types/booking'; 
-import API_URL from '../config';
+import type { BookingRequest, BookingResponse } from '../types/booking'; 
+//import API_URL from '../config';
 
 const API_BOOKINGS_URL = '/api/bookings';
 //const API_BOOKINGS_URL = `${API_URL}/bookings` || '/api/bookings';

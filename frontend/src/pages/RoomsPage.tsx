@@ -37,7 +37,7 @@ const RoomsPage: React.FC = () => {
     fetchRooms();
   }, [currentPage]);
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value - 1); 
   };
 

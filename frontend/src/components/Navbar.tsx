@@ -6,7 +6,8 @@ import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import { useAuth } from '../contexts/AuthContext';
 
 const Navbar: React.FC = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -51,9 +52,6 @@ const Navbar: React.FC = () => {
               >
                 Mis Reservas
               </Button>
-              {/* <Typography sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
-                Hola, {user?.username}
-              </Typography> */}
               <Button
                 variant="outlined"
                 onClick={handleLogout}

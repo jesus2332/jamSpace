@@ -98,7 +98,7 @@ const HeroSection: React.FC = () => {
                 overflow: 'hidden', 
               }}
             >
-              <img src="hero2.png" alt="" className="w-full h-full object-cover" />
+              <img src="hero.jpg" alt="" className="w-full h-full object-cover" />
             </Paper>
           </Grid>
         </Grid>

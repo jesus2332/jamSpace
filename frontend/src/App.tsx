@@ -1,6 +1,6 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route, Link as RouterLink } from 'react-router';
-import { AppBar, Toolbar, Typography, Container, Button, Box, CircularProgress } from '@mui/material'; 
+import { Typography, Container, Button, Box, CircularProgress } from '@mui/material'; 
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import RoomsPage from './pages/RoomsPage'; 

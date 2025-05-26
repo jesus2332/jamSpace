@@ -84,7 +84,7 @@ const RegisterPage: React.FC = () => {
                 required
                 fullWidth
                 name="password"
-                label="Contraseña"
+                label="Contraseña (minimo 8 caracteres)"
                 type="password"
                 id="password"
                 value={password}

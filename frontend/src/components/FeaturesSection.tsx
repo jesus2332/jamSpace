@@ -12,10 +12,9 @@ interface FeatureItemProps {
   description: string;
   bgColor: string; 
   iconBgColor: string; 
-  iconColor: string; 
 }
 
-const FeatureCard: React.FC<FeatureItemProps> = ({ icon, title, description, bgColor, iconBgColor, iconColor }) => {
+const FeatureCard: React.FC<FeatureItemProps> = ({ icon, title, description, bgColor, iconBgColor }) => {
   return (
     <Paper
       elevation={4}
@@ -64,7 +63,6 @@ const featuresData: FeatureItemProps[] = [
     description: 'Equipos de alta gama, amplificadores y sistemas de sonido de las mejores marcas como Marshall, Fender, y DW Drums.',
     bgColor: 'rgba(126, 92, 204, 0.3)', 
     iconBgColor: 'rgba(126, 92, 204, 0.5)', 
-    iconColor: '#c084fc', 
   },
   {
     icon: <ShieldOutlinedIcon />,
@@ -72,7 +70,6 @@ const featuresData: FeatureItemProps[] = [
     description: 'Salas acústicamente aisladas que te permiten tocar a cualquier volumen sin molestar a los demás.',
     bgColor: 'rgba(219, 99, 130, 0.3)', 
     iconBgColor: 'rgba(219, 99, 130, 0.5)',
-    iconColor: '#f472b6', 
   },
   {
     icon: <AccessTimeFilledIcon />,
@@ -80,7 +77,6 @@ const featuresData: FeatureItemProps[] = [
     description: 'Sistema de reserva en línea disponible 24/7 para tu conveniencia.',
     bgColor: 'rgba(92, 139, 204, 0.3)', 
     iconBgColor: 'rgba(92, 139, 204, 0.5)',
-    iconColor: '#60a5fa', 
   },
   {
     icon: <FlashOnIcon />,
@@ -88,7 +84,6 @@ const featuresData: FeatureItemProps[] = [
     description: 'Espacios pensados para inspirarte, con iluminación ambiental y diseño que estimula la creatividad musical.',
     bgColor: 'rgba(79, 170, 120, 0.3)', 
     iconBgColor: 'rgba(79, 170, 120, 0.5)',
-    iconColor: '#34d399', 
   },
 ];
 
