@@ -72,7 +72,7 @@ public class JwtTokenProvider {
             logger.error("Unsupported JWT token: {}", ex.getMessage());
         } catch (IllegalArgumentException ex) {
             logger.error("JWT claims string is empty: {}", ex.getMessage());
-        } // io.jsonwebtoken.security.SecurityException puede ocurrir si la clave es inválida
+        }
         catch (io.jsonwebtoken.security.SignatureException ex) {
             logger.error("JWT signature does not match locally computed signature: {}", ex.getMessage());
         }

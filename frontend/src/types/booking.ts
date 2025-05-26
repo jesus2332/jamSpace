@@ -3,8 +3,8 @@ import type { Page } from "./common";
 
 export interface BookingRequest {
   roomId: number;
-  startTime: string; // ISO string
-  endTime: string;   // ISO string
+  startTime: string; 
+  endTime: string;   
 }
 
 export interface BookingResponse {
@@ -13,9 +13,9 @@ export interface BookingResponse {
   roomName: string;
   userId: number;
   username: string;
-  startTime: string; // ISO string
-  endTime: string;   // ISO string
-  createdAt: string; // ISO string
+  startTime: string; 
+  endTime: string;   
+  createdAt: string; 
   totalCost: number; 
 }
 

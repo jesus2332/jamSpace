@@ -3,9 +3,11 @@ import axios from 'axios';
 import type { LoginResponse, RegisterResponse } from '../types/auth'; 
 import type { User } from '../types/auth'; 
 //import API_URL from '../config';
-const API_AUTH_URL = '/api/auth'; 
+//const API_AUTH_URL = '/api/auth'; 
 //const API_AUTH_URL = `${API_URL}/auth` || '/api/auth'; 
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_AUTH_URL = `${API_BASE_URL}/auth`;
 interface RegisterData {
   username: string;
   email: string;

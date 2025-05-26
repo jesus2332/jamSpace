@@ -3,10 +3,8 @@ import axios from 'axios';
 import type { BookingRequest, BookingResponse } from '../types/booking'; 
 //import API_URL from '../config';
 
-const API_BOOKINGS_URL = '/api/bookings';
-//const API_BOOKINGS_URL = `${API_URL}/bookings` || '/api/bookings';
-
-
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BOOKINGS_URL = `${API_BASE}/bookings`
 
 export const createBooking = async (bookingData: BookingRequest): Promise<BookingResponse> => {
   try {

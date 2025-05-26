@@ -1,10 +1,9 @@
 import axios from 'axios';
 import type { PaginatedRoomResponse, Room } from '../types/room'; 
-const API_BASE_URL = '/api/rooms'; // 
-//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/rooms';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 //import API_URL from '../config';
 
-//const API_BASE_URL = `${API_URL}/rooms` || 'http://localhost:8080/api/rooms';
+const API_BASE_URL = `${API_BASE}/rooms` || 'http://localhost:8080/api/rooms';
 
 export const getAllRooms = async (page: number = 0, size: number = 10, sort: string = 'id,asc'): Promise<PaginatedRoomResponse> => {
   try {
