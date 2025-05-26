@@ -69,3 +69,6 @@ backend/.nb-gradle/
 backend/build/      
 
 
+frontend/src/pages/RoomDetailPage copy.tsx
+backend/src/main/resources/application.properties
+
