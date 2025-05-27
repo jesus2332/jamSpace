@@ -25,7 +25,6 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    //  mapear  Entidad User a UserResponseDTO
     private UserResponseDTO convertToResponseDTO(User user) {
         return new UserResponseDTO(
                 user.getId(),

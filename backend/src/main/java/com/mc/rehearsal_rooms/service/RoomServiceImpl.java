@@ -10,8 +10,11 @@ import com.mc.rehearsal_rooms.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable; // Importar
+
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
@@ -59,20 +62,30 @@ public class RoomServiceImpl implements RoomService{
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable("rooms")
     public Page<RoomResponseDTO> getAllRooms(Pageable pageable) {
-        Page<Room> roomPage = roomRepository.findAll(pageable);
-        List<RoomResponseDTO> roomResponseDTOs = roomPage.getContent()
-                .stream()
-                .map(this::convertToResponseDTO)
+        Page<Room> roomPageOnly = roomRepository.findAllRoomsOnly(pageable);
+        List<Room> roomsWithEquipment = roomRepository.findAllWithEquipmentForGivenRooms(roomPageOnly.getContent());
+
+        Map<Integer, Room> roomsWithEquipmentMap = roomsWithEquipment.stream()
+                .collect(Collectors.toMap(Room::getId, room -> room));
+
+        List<RoomResponseDTO> dtos = roomPageOnly.getContent().stream()
+                .map(room -> {
+                    Room roomFull = roomsWithEquipmentMap.getOrDefault(room.getId(), room);
+                    return convertToResponseDTO(roomFull);
+                })
                 .collect(Collectors.toList());
-        return new PageImpl<>(roomResponseDTOs, pageable, roomPage.getTotalElements());
+
+        return new PageImpl<>(dtos, pageable, roomPageOnly.getTotalElements());
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "room", key = "#id")
     public Optional<RoomResponseDTO> getRoomById(int id) {
         return roomRepository.findById(id)
-                .map(this::convertToResponseDTO); // Mapea el Room a RoomResponseDTO si está presente
+                .map(this::convertToResponseDTO);
     }
 
     @Override

@@ -2,8 +2,11 @@ package com.mc.rehearsal_rooms;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching; // Importar
+
 
 @SpringBootApplication
+@EnableCaching
 public class RehearsalRoomsApplication {
 
 	public static void main(String[] args) {

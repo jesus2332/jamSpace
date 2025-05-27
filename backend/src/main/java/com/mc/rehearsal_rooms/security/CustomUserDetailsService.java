@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional
+    @Cacheable(value = "userDetails", key = "#usernameOrEmail")
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(usernameOrEmail)
                 .orElseGet(() -> userRepository.findByEmail(usernameOrEmail)
@@ -38,6 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Transactional
+    @Cacheable(value = "userDetailsById", key = "#id")
     public UserDetails loadUserById(int id) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new UsernameNotFoundException("User not found with id : " + id)

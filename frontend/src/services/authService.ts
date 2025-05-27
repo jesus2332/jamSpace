@@ -32,9 +32,8 @@ export const registerUser = async (userData: RegisterData): Promise<RegisterResp
     throw new Error('Error de red o desconocido en el registro');
   }
 };
-const API_USERS_URL = '/api/users'; 
-//const API_USERS_URL = `${API_URL}/users` || '/api/users'; 
-
+//const API_USERS_URL = '/api/users'; 
+const API_USERS_URL = `${API_BASE_URL}/users`;
 export const getMe = async (): Promise<User> => {
   try {
     const response = await axios.get<User>(`${API_USERS_URL}/me`);

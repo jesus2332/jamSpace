@@ -29,7 +29,7 @@ public class Room {
     private String description;
 
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "room_equipment", joinColumns = @JoinColumn(name = "room_id"))
     @Column(name = "equipment_item")
     private List<String> equipment = new ArrayList<>();

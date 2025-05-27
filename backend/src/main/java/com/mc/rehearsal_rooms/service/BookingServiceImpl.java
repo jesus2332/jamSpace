@@ -12,6 +12,7 @@ import com.mc.rehearsal_rooms.repository.BookingRepository;
 import com.mc.rehearsal_rooms.repository.RoomRepository;
 import com.mc.rehearsal_rooms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -130,6 +131,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "booking", key = "#bookingId")
+
     public Optional<BookingResponseDTO> getBookingById(int bookingId) {
         return bookingRepository.findById(bookingId).map(this::convertToResponseDTO);
     }
