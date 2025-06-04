@@ -60,7 +60,7 @@ public class BookingController {
     @GetMapping("/my-bookings")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<BookingResponseDTO>> getMyBookings(
-            @PageableDefault(size = 10, sort = "startTime") Pageable pageable // Pageable para futuras mejoras
+            @PageableDefault(size = 10, sort = "startTime") Pageable pageable
     ) {
         String username = getAuthenticatedUsername();
         List<BookingResponseDTO> bookings = bookingService.getMyBookings(username, pageable);

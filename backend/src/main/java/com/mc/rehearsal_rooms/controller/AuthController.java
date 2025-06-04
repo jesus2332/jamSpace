@@ -47,7 +47,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()") // Solo para usuarios autenticados
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponseDTO> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
         User user = userRepository.findByUsername(username)

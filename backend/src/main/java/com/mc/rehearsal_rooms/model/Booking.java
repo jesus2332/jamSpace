@@ -39,7 +39,7 @@ public class Booking {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false, precision = 12, scale = 2) // Precisión mayor por si son muchas horas
+    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalCost;
 
 

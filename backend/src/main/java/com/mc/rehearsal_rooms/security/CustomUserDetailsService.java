@@ -50,7 +50,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private UserDetails buildUserDetails(User user) {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER")); // Todos los usuarios autenticados son ROLE_USER
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         if (user.isAdmin()) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }

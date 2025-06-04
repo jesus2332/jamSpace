@@ -16,7 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component // Asegúrate de que sea un bean para poder inyectarlo en SecurityConfig
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
@@ -37,11 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String username = tokenProvider.getUsernameFromJWT(jwt);
 
-                // Cargar UserDetails para establecer la autenticación
-                // Esto consultará la BD en cada petición con token válido.
-                // Alternativa: Podrías incluir roles/authorities directamente en el token
-                // y construir UserDetails a partir de ellos para evitar la consulta a BD,
-                // pero tiene implicaciones de seguridad (ej. si los roles del usuario cambian).
+
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
@@ -51,8 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
-            // No relanzamos la excepción aquí para permitir que la cadena de filtros continúe.
-            // Si la autenticación no se establece, el acceso a recursos protegidos fallará más adelante.
+
         }
 
         filterChain.doFilter(request, response);
